@@ -1,0 +1,9 @@
+machine:
+    node:
+        version: 4.2.3
+
+test:
+    override:
+        - npm run test:ci
+    post:
+        - npm run cover:ci
