@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { Actor, Grid } from '../actions/types'
+import { Actor, Maze } from '../actions/types'
 
 const initialState = {
     actors: []
@@ -15,6 +15,12 @@ export default (state = initialState, action) => {
                     x: action.posX,
                     y: action.posY
                 })
+                return _state
+            case Maze.HighlightRoom:
+                _state.maze.highlightedRoom = {
+                    row_index: action.row_index,
+                    column_index: action.column_index
+                }
                 return _state
             default:
                 return state

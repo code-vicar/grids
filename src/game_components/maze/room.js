@@ -4,6 +4,7 @@ export default class Room extends GameComponent {
     constructor(state) {
         super(state)
 
+        this.highlighted = state.highlighted
         this.x = state.x
         this.y = state.y
         this.height = state.height
@@ -38,7 +39,13 @@ export default class Room extends GameComponent {
                 offsetY = this.height
                 break;
         }
+
         stage.beginFill()
+        if (this.highlighted) {
+            stage.lineStyle(2, 0x00BD0D)
+        } else {
+            stage.lineStyle(2, 0xDD0000)
+        }
         stage.moveTo(startX, startY)
         stage.lineTo(startX + offsetX, startY + offsetY)
         stage.endFill()
