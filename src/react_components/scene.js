@@ -5,7 +5,8 @@ import { Link } from 'react-router'
 import PIXI from 'pixi.js'
 
 import { addActor } from '../actions/actor'
-import * as game from '../services/game'
+import Game from '../game_components/game'
+import Maze from '../game_components/maze/maze'
 
 export class Scene extends React.Component {
     componentWillMount() {
@@ -15,19 +16,22 @@ export class Scene extends React.Component {
         this.renderer.backgroundColor = sceneState.backgroundColor
 
         this.stage = new PIXI.Graphics()
-
         console.log(sceneState)
-        game.render(this.stage, sceneState)
 
-        let animate = function () {
-            if (!_.get(this, 'renderer')) {
-                return
-            }
+        let game = new Game(this.stage)
 
-            this.renderer.render(this.stage)
-            this.frame = requestAnimationFrame(animate)
-        }.bind(this)
-        animate()
+        let mazeState = sceneState.maze
+        let maze = new Maze({
+            x: 0,
+            y: 0,
+            height: sceneState.height,
+            width: sceneState.width,
+            padding: mazeState.padding,
+            grid: mazeState.grid
+        })
+
+        game.addToStage(maze)
+        game.render(this.renderer)
     }
 
     componentWillUnmount() {
