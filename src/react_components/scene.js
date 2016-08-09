@@ -20,7 +20,6 @@ export class Scene extends React.Component {
             view: this._canvas
         })
         this.renderer.backgroundColor = sceneState.backgroundColor
-        this.stage = new PIXI.Graphics()
 
         this.createMaze()
     }
@@ -70,6 +69,10 @@ export class Scene extends React.Component {
             highlightedRoom: mazeState.highlightedRoom
         })
 
+        if (this.stage) {
+            this.stage.destroy(true)
+        }
+        this.stage = new PIXI.Graphics()
         let game = new Game(this.stage)
         game.addToStage(this.maze)
         game.render(this.renderer)
