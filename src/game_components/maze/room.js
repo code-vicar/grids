@@ -18,6 +18,10 @@ export default class Room extends GameComponent {
                 this.drawWall(stage, wall)
             }
         })
+
+        if (this.highlighted) {
+            this.drawHighlight(stage)
+        }
     }
 
     drawWall(stage, wall) {
@@ -41,13 +45,18 @@ export default class Room extends GameComponent {
         }
 
         stage.beginFill()
-        if (this.highlighted) {
-            stage.lineStyle(2, 0x00BD0D)
-        } else {
-            stage.lineStyle(2, 0xDD0000)
-        }
         stage.moveTo(startX, startY)
         stage.lineTo(startX + offsetX, startY + offsetY)
         stage.endFill()
+    }
+
+    drawHighlight(stage) {
+        let graphic = new PIXI.Graphics()
+        graphic.beginFill(0x00BD0D, 0)
+        graphic.lineStyle(2, 0x00BD0D)
+        graphic.drawRect(this.x, this.y, this.width, this.height)
+        graphic.endFill()
+        stage.removeChildren()
+        stage.addChild(graphic)
     }
 }

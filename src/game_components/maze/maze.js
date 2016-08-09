@@ -31,7 +31,6 @@ export default class Maze extends GameComponent {
         let adjustedX = x - paddingOffset
         let adjustedY = y - paddingOffset
 
-        // console.log('adjusted', adjustedX, adjustedY)
         if (adjustedX < 0 || adjustedY < 0 || adjustedX > gridWidth || adjustedY > gridHeight) {
             return
         }

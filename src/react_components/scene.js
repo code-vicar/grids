@@ -25,11 +25,11 @@ export class Scene extends React.Component {
         this.createMaze()
     }
 
-    shouldComponentUpdate() {
-        let row = _.get(this, 'props.scene.maze.highlightedRoom.row_index')
-        let column = _.get(this, 'props.scene.maze.highlightedRoom.column_index')
+    shouldComponentUpdate(nextProps) {
+        let highlightedRoom = _.get(this, 'maze.highlightedRoom')
+        let nextHighlightedRoom = _.get(nextProps, 'scene.maze.highlightedRoom')
 
-        return (_.isNil(this.maze.highlightedRoom) || this.maze.highlightedRoom.row_index !== row || this.maze.highlightedRoom.column_index !== column)
+        return diffRoom(highlightedRoom, nextHighlightedRoom)
     }
 
     componentWillUpdate() {
@@ -50,7 +50,7 @@ export class Scene extends React.Component {
 
         let room = this.maze.getRoomFromCoords(x, y)
 
-        if (room) {
+        if (!_.isNil(room) && diffRoom(room, this.maze.highlightedRoom)) {
             let onRoomHovered = _.get(this, 'props.onRoomHovered')
             onRoomHovered(room)
         }
@@ -82,6 +82,15 @@ export class Scene extends React.Component {
             }} onMouseMove={this.mouseMove} />
         )
     }
+}
+
+function diffRoom(room1, room2) {
+    let row1 = _.get(room1, 'row_index')
+    let row2 = _.get(room2, 'row_index')
+    let col1 = _.get(room1, 'column_index')
+    let col2 = _.get(room2, 'column_index')
+
+    return (row1 !== row2 || col1 !== col2)
 }
 
 function mapStateToProps(state) {
