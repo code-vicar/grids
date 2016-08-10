@@ -6,7 +6,7 @@ export default class Header extends React.Component {
         return (
             <div>
                 <Link to="/">The Scene</Link>
-                <Link to="/test">Test Routing</Link>
+                <Link to="/other">Test Routing</Link>
             </div>
         )
     }

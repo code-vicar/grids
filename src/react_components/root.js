@@ -5,6 +5,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
+import config from '../config.json'
 import App from './app'
 import Test from './test'
 import Scene from './scene'
@@ -21,10 +22,9 @@ export default class Root extends Component {
             <MuiThemeProvider muiTheme={ getMuiTheme() }>
                 <Provider store={store}>
                     <Router history={history}>
-                        <Route path="/" component={App}>
-                            <IndexRoute component={Scene}/>
-                            <Route path="/test" component={Test}>
-                            </Route>
+                        <Route path={config.basename} component={App}>
+                            <Route path="/" component={Scene} />
+                            <Route path="/other" component={Test} />
                         </Route>
                     </Router>
                 </Provider>
