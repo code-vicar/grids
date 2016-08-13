@@ -3,6 +3,7 @@ var gulp = require('gulp');
 var del = require('del');
 var gutil = require('gulp-util');
 var webpack = require('webpack');
+var HtmlwebpackPlugin = require('html-webpack-plugin');
 var WebpackDevServer = require('webpack-dev-server');
 var webpackConfig = require('./webpack.config.js');
 
@@ -26,8 +27,17 @@ gulp.task('webpack:build-dev', ['clean'], function (callback) {
 });
 
 gulp.task('webpack:build', ['clean'], function (callback) {
+    process.env.NODE_ENV = 'production'
     // modify some webpack config options
+
     var myConfig = Object.create(webpackConfig);
+
+    myConfig.plugins.splice(0, 1, new HtmlwebpackPlugin({
+        template: './index.html',
+        filename: '200.html',
+        inject: true
+    }))
+
     myConfig.plugins = myConfig.plugins.concat(
         new webpack.DefinePlugin({
             'process.env': {
@@ -35,13 +45,15 @@ gulp.task('webpack:build', ['clean'], function (callback) {
                 'NODE_ENV': JSON.stringify('production')
             }
         }),
-        new webpack.optimize.DedupePlugin(),
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false
-            }
-        })
+        new webpack.optimize.DedupePlugin()
     );
+
+    myConfig.module.loaders.unshift({
+        test: /\.jsx?$/,
+        exclude: /code-vicar/,
+        loader: 'uglify'
+    })
+
 
     // run webpack
     webpack(myConfig, function (err, stats) {
