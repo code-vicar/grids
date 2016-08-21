@@ -1,22 +1,72 @@
 import _ from 'lodash'
 
+import Maze from './maze/maze'
+
+let instance = null
+
 export default class Game {
-    constructor(stage) {
-        this.stage = stage
-        this.components = []
+    constructor() {
+        this._init = null
+        this._loaded = false
     }
 
-    addToStage(component) {
-        this.components.push(component)
+    static get instance() {
+        return instance
     }
 
-    render(renderer) {
-        this.components.forEach((component) => {
-            // draw the components onto the stage
-            component.render(this.stage)
-        })
+    init() {
+        if (_.isNil(this._init)) {
+            let errors = []
 
-        // draw the stage onto the canvas
-        renderer.render(this.stage)
+            this._init = new Promise((resolve, reject) => {
+                PIXI.loader.on('error', (err) => {
+                    errors.push(err)
+                })
+
+                PIXI.loader.add('static/green_dash_rect.png')
+                PIXI.loader.add('static/roads.json')
+
+                PIXI.loader.load(() => {
+                    this._loaded = true
+
+                    if (errors.length > 0) {
+                        return reject(errors)
+                    }
+
+                    this._onLoaded()
+                    return resolve()
+                })
+            })
+        }
+
+        return this._init
+    }
+
+    _onLoaded() {
+        this.stage = new PIXI.Container()
+
+        this.maze = new Maze(0, 0, 500, 500)
+        this.maze.padding = 50
+        this.stage.addChild(this.maze.container)
+    }
+
+    setRenderer(renderer) {
+        this.renderer = renderer
+    }
+
+    update() {
+        this.maze.update()
+    }
+
+    render() {
+        this.renderer.render(this.stage)
+    }
+
+    makeGlobal() {
+        if (instance) {
+            throw new Error('Attempted overwrite of global Game instance')
+        }
+
+        instance = this
     }
 }

@@ -6,7 +6,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
 import App from './app'
-import Scene from './scene'
+import SceneContainer from './sceneContainer'
 
 // Needed for onTouchTap
 // Check this repo:
@@ -21,7 +21,7 @@ export default class Root extends Component {
                 <Provider store={store}>
                     <Router history={history}>
                         <Route path="/" component={App}>
-                            <IndexRoute component={Scene} />
+                            <IndexRoute component={SceneContainer} />
                         </Route>
                     </Router>
                 </Provider>

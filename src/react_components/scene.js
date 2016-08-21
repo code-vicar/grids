@@ -1,12 +1,11 @@
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { Link } from 'react-router'
 import PIXI from 'pixi.js'
 
-import { highlightRoom } from '../actions/maze'
 import Game from '../game_components/game'
-import Maze from '../game_components/maze/maze'
+
+import { highlightRoom } from '../actions/scene'
 
 export class Scene extends React.Component {
     constructor(props) {
@@ -15,31 +14,33 @@ export class Scene extends React.Component {
     }
 
     componentDidMount() {
-        let sceneState = _.get(this, 'props.scene')
-        this.renderer = PIXI.autoDetectRenderer(sceneState.height, sceneState.width, {
+        let mazeState = _.get(this, 'props.scene.maze')
+        this.renderer = PIXI.autoDetectRenderer(mazeState.height, mazeState.width, {
             view: this._canvas
         })
-        this.renderer.backgroundColor = sceneState.backgroundColor
+        this.renderer.backgroundColor = 0x3498db
 
-        this.createMaze()
+        this.game = Game.instance
+        this.game.maze.padding = mazeState.padding
+        this.game.maze.height = mazeState.height
+        this.game.maze.width = mazeState.width
+        this.game.setRenderer(this.renderer)
+
+        this.game.update()
+        this.game.render()
     }
 
-    shouldComponentUpdate(nextProps) {
-        let highlightedRoom = _.get(this, 'maze.highlightedRoom')
-        let nextHighlightedRoom = _.get(nextProps, 'scene.maze.highlightedRoom')
+    componentDidUpdate() {
+        let mazeState = _.get(this, 'props.scene.maze')
+        this.game.maze.highlightedRoom = mazeState.highlightedRoom
 
-        return diffRoom(highlightedRoom, nextHighlightedRoom)
-    }
-
-    componentWillUpdate() {
-        this.createMaze()
+        this.game.update()
+        this.game.render()
     }
 
     componentWillUnmount() {
         this.renderer.destroy()
         delete this.renderer
-        this.stage.destroy()
-        delete this.stage
     }
 
     mouseMove(event) {
@@ -47,42 +48,19 @@ export class Scene extends React.Component {
         let x = event.clientX - cRect.left
         let y = event.clientY - cRect.top
 
-        let room = this.maze.getRoomFromCoords(x, y)
+        let room = this.game.maze.getRoomFromCoords(x, y)
 
-        if (!_.isNil(room) && diffRoom(room, this.maze.highlightedRoom)) {
+        if (!_.isNil(room) && diffRoom(room, this.game.maze.highlightedRoom)) {
             let onRoomHovered = _.get(this, 'props.onRoomHovered')
             onRoomHovered(room)
         }
-    }
-
-    createMaze() {
-        let sceneState = _.get(this, 'props.scene')
-        let mazeState = sceneState.maze
-
-        this.maze = new Maze({
-            x: 0,
-            y: 0,
-            height: sceneState.height,
-            width: sceneState.width,
-            padding: mazeState.padding,
-            grid: mazeState.grid,
-            highlightedRoom: mazeState.highlightedRoom
-        })
-
-        if (this.stage) {
-            this.stage.destroy(true)
-        }
-        this.stage = new PIXI.Graphics()
-        let game = new Game(this.stage)
-        game.addToStage(this.maze)
-        game.render(this.renderer)
     }
 
     render() {
         return (
             <canvas ref={(c) => {
                 this._canvas = c
-            }} onMouseMove={this.mouseMove} />
+            } } onMouseMove={this.mouseMove} />
         )
     }
 }

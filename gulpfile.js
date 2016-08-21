@@ -1,3 +1,4 @@
+var path = require('path');
 var _ = require('lodash');
 var gulp = require('gulp');
 var del = require('del');
@@ -65,7 +66,7 @@ gulp.task('webpack:build', ['clean'], function (callback) {
     });
 });
 
-gulp.task('webpack-dev-server', function (callback) {
+gulp.task('webpack-dev-server', ['copy-static'], function (callback) {
     // Start a webpack-dev-server
     var config = _.assign({}, webpackConfig, {
         entry: _.assign({}, webpackConfig.entry, {
@@ -75,6 +76,7 @@ gulp.task('webpack-dev-server', function (callback) {
 
     new WebpackDevServer(webpack(config), {
         historyApiFallback: true,
+        contentBase: path.resolve('./dist'),
         stats: {
             colors: true
         }
@@ -85,6 +87,10 @@ gulp.task('webpack-dev-server', function (callback) {
         gutil.log('[webpack-dev-server]', 'http://localhost:9898/')
     });
 });
+
+gulp.task('copy-static', function () {
+    return gulp.src('src/static/**').pipe(gulp.dest('./dist/static'))
+})
 
 // The development server (the recommended option for development)
 gulp.task('default', ['webpack-dev-server']);

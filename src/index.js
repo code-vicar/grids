@@ -11,10 +11,10 @@ import { getInitialState } from './settings'
 const store = configureStore(getInitialState())
 const history = syncHistoryWithStore(browserHistory, store)
 
-let div = document.createElement('div');
-document.body.appendChild(div);
+let div = document.createElement('div')
+document.body.appendChild(div)
 
 ReactDOM.render(
     <Root store={store} history={history} />,
     div
-);
+)

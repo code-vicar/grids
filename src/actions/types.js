@@ -1,7 +1,5 @@
-export const Actor = {
-    Add: 'ACTOR_ADD'
-}
-
-export const Maze = {
-    HighlightRoom: 'HIGHLIGHT_ROOM'
+export const Scene = {
+    HighlightRoom: 'SCENE_HIGHLIGHT_ROOM',
+    Loaded: 'SCENE_LOADED',
+    LoadingError: 'SCENE_LOADING_ERROR'
 }
