@@ -4,6 +4,8 @@ var gulp = require('gulp');
 var del = require('del');
 var gutil = require('gulp-util');
 var webpack = require('webpack');
+var runSequence = require('run-sequence');
+
 var HtmlwebpackPlugin = require('html-webpack-plugin');
 var WebpackDevServer = require('webpack-dev-server');
 var webpackConfig = require('./webpack.config.js');
@@ -16,7 +18,7 @@ myDevConfig.debug = true;
 // create a single instance of the compiler to allow caching
 var devCompiler = webpack(myDevConfig);
 
-gulp.task('webpack:build-dev', ['clean'], function (callback) {
+gulp.task('webpack:build-dev', function (callback) {
     // run webpack
     devCompiler.run(function (err, stats) {
         if (err) throw new gutil.PluginError('webpack:build-dev', err);
@@ -27,7 +29,7 @@ gulp.task('webpack:build-dev', ['clean'], function (callback) {
     });
 });
 
-gulp.task('webpack:build', ['clean'], function (callback) {
+gulp.task('webpack:build', function (callback) {
     process.env.NODE_ENV = 'production'
     // modify some webpack config options
 
@@ -66,7 +68,7 @@ gulp.task('webpack:build', ['clean'], function (callback) {
     });
 });
 
-gulp.task('webpack-dev-server', ['copy-static'], function (callback) {
+gulp.task('webpack-dev-server', function (callback) {
     // Start a webpack-dev-server
     var config = _.assign({}, webpackConfig, {
         entry: _.assign({}, webpackConfig.entry, {
@@ -92,16 +94,23 @@ gulp.task('copy-static', function () {
     return gulp.src('src/static/**').pipe(gulp.dest('./dist/static'))
 })
 
-// The development server (the recommended option for development)
-gulp.task('default', ['webpack-dev-server']);
-
-gulp.task('build-dev', ['clean', 'webpack:build-dev'], function () {
-    gulp.watch(['src/**/*'], ['webpack:build-dev']);
-});
-
-// Production build
-gulp.task('build', ['clean', 'webpack:build']);
-
 gulp.task('clean', function () {
     return del('dist')
+})
+
+// The development server (the recommended option for development)
+gulp.task('default', function () {
+    return runSequence('clean', 'copy-static', 'webpack-dev-server')
+})
+
+gulp.task('build-dev', function () {
+    return runSequence('clean', 'webpack:build-dev', 'copy-static', 'build-dev-watch')
+})
+gulp.task('build-dev-watch', function () {
+    return gulp.watch(['src/**/*'], ['webpack:build-dev'])
+})
+
+// Production build
+gulp.task('build', function () {
+    return runSequence('clean', 'webpack:build', 'copy-static')
 })
