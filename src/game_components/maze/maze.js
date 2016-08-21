@@ -5,22 +5,19 @@ export default class Maze {
     constructor(x, y, height, width) {
         this.container = new PIXI.Container()
 
-        this.grid = new Grid()
-        this.grid.runSidewinderMaze()
-        console.log(this.grid.toString())
-
-        this._grid = new PIXI.Graphics()
-        this.container.addChild(this._grid)
-
-        this.greenHighlight = new PIXI.Sprite(PIXI.Texture.fromImage('static/green_dash_rect.png'))
-        this.greenHighlight.visible = false
-        this.container.addChild(this.greenHighlight)
-
-        this.padding = 0
         this.x = x
         this.y = y
         this.height = height
         this.width = width
+
+        this.grid = new Grid()
+        this.grid.runSidewinderMaze()
+        console.log(this.grid.toString())
+
+        this._createRoomSprites()
+        this.greenHighlight = new PIXI.Sprite(PIXI.Texture.fromImage('static/green_dash_rect.png'))
+        this.greenHighlight.visible = false
+        this.container.addChild(this.greenHighlight)
     }
 
     get x() {
@@ -60,129 +57,99 @@ export default class Maze {
     }
 
     getRoomFromCoords(x, y) {
-        let padding = this.padding
-        let stageHeight = this.height
-        let stageWidth = this.width
-
-        let gridHeight = stageHeight - padding
-        let cellHeight = Math.floor(gridHeight / this.grid.rowsLength)
-
-        let gridWidth = stageWidth - padding
-        let cellWidth = Math.floor(gridWidth / this.grid.columnsLength)
-
-        let paddingOffset = (padding / 2)
-
-        let adjustedX = x - paddingOffset
-        let adjustedY = y - paddingOffset
-
-        if (adjustedX < 0 || adjustedY < 0 || adjustedX > gridWidth || adjustedY > gridHeight) {
+        if (x < 0 || y < 0 || x > this.width || y > this.height) {
             return
         }
 
+        let cellHeight = Math.floor(this.height / this.grid.rowsLength)
+        let cellWidth = Math.floor(this.width / this.grid.columnsLength)
+
         return {
-            row_index: Math.floor(adjustedY / cellHeight),
-            column_index: Math.floor(adjustedX / cellWidth)
+            row_index: Math.floor(y / cellHeight),
+            column_index: Math.floor(x / cellWidth)
+        }
+    }
+
+    _createRoomSprites() {
+        this.rooms = new Map()
+        for (let row of this.grid.rows) {
+            for (let column of this.grid.columns) {
+                let cell = this.grid.getCell(row, column)
+
+                let room = new PIXI.Sprite(this._getRoomTexture({
+                    N: this.grid.hasLinkNorth(cell),
+                    E: this.grid.hasLinkEast(cell),
+                    S: this.grid.hasLinkSouth(cell),
+                    W: this.grid.hasLinkWest(cell)
+                }))
+
+                room.visible = false
+                this.rooms.set(`${row}-${column}`, room)
+                this.container.addChild(room)
+            }
+        }
+    }
+
+    _getRoomTexture(paths) {
+        if (paths.N && paths.E && paths.W && paths.S) {
+            return PIXI.Texture.fromFrame('road.ase')
+        } else if (paths.N && paths.E && paths.S && !paths.W) {
+            return PIXI.Texture.fromFrame('roadTE.ase')
+        } else if (paths.N && paths.E && !paths.S && paths.W) {
+            return PIXI.Texture.fromFrame('roadTN.ase')
+        } else if (paths.N && !paths.E && paths.S && paths.W) {
+            return PIXI.Texture.fromFrame('roadTW.ase')
+        } else if (!paths.N && paths.E && paths.S && paths.W) {
+            return PIXI.Texture.fromFrame('roadTS.ase')
+        } else if (paths.N && paths.E && !paths.S && !paths.W) {
+            return PIXI.Texture.fromFrame('roadNE.ase')
+        } else if (paths.N && !paths.E && !paths.S && paths.W) {
+            return PIXI.Texture.fromFrame('roadNW.ase')
+        } else if (!paths.N && !paths.E && paths.S && paths.W) {
+            return PIXI.Texture.fromFrame('roadSW.ase')
+        } else if (!paths.N && paths.E && paths.S && !paths.W) {
+            return PIXI.Texture.fromFrame('roadSE.ase')
+        } else if (!paths.N && paths.E && !paths.S && paths.W) {
+            return PIXI.Texture.fromFrame('roadEW.ase')
+        } else if (paths.N && !paths.E && paths.S && !paths.W) {
+            return PIXI.Texture.fromFrame('roadNS.ase')
+        } else if (paths.N && !paths.E && !paths.S && !paths.W) {
+            return PIXI.Texture.fromFrame('roadEndN.ase')
+        } else if (!paths.N && paths.E && !paths.S && !paths.W) {
+            return PIXI.Texture.fromFrame('roadEndE.ase')
+        } else if (!paths.N && !paths.E && paths.S && !paths.W) {
+            return PIXI.Texture.fromFrame('roadEndS.ase')
+        } else if (!paths.N && !paths.E && !paths.S && paths.W) {
+            return PIXI.Texture.fromFrame('roadEndW.ase')
+        }
+
+        return PIXI.Texture.fromFrame('roadEndE.ase')
+    }
+
+    _draw() {
+        let cellHeight = Math.floor(this.height / this.grid.rowsLength)
+        let cellWidth = Math.floor(this.width / this.grid.columnsLength)
+
+        for (let row of this.grid.rows) {
+            for (let column of this.grid.columns) {
+                let room = this.rooms.get(`${row}-${column}`)
+                room.height = cellHeight
+                room.width = cellWidth
+                room.x = (column * cellWidth)
+                room.y = (row * cellHeight)
+                room.visible = true
+            }
         }
     }
 
     _drawHighlight(row, column) {
-        if (!this.grid || this.grid.rowsLength <= 0 || this.grid.columnsLength <= 0) {
-            return
-        }
-
-        let padding = this.padding
-        let stageHeight = this.height
-        let stageWidth = this.width
-
-        let gridHeight = stageHeight - padding
-        let cellHeight = Math.floor(gridHeight / this.grid.rowsLength)
-
-        let gridWidth = stageWidth - padding
-        let cellWidth = Math.floor(gridWidth / this.grid.columnsLength)
-
-        let paddingOffset = (padding / 2)
+        let cellHeight = Math.floor(this.height / this.grid.rowsLength)
+        let cellWidth = Math.floor(this.width / this.grid.columnsLength)
 
         this.greenHighlight.height = cellHeight
         this.greenHighlight.width = cellWidth
-        this.greenHighlight.x = (column * cellWidth) + paddingOffset
-        this.greenHighlight.y = (row * cellHeight) + paddingOffset
+        this.greenHighlight.x = (column * cellWidth)
+        this.greenHighlight.y = (row * cellHeight)
         this.greenHighlight.visible = true
-    }
-
-    _draw(grid) {
-        if (grid) {
-            this.grid = grid
-        }
-
-        if (!this.grid || this.grid.rowsLength <= 0 || this.grid.columnsLength <= 0) {
-            return
-        }
-
-        let padding = this.padding
-        let stageHeight = this.height
-        let stageWidth = this.width
-
-        let gridHeight = stageHeight - padding
-        let cellHeight = Math.floor(gridHeight / this.grid.rowsLength)
-
-        let gridWidth = stageWidth - padding
-        let cellWidth = Math.floor(gridWidth / this.grid.columnsLength)
-
-        let paddingOffset = (padding / 2)
-
-        // background
-        this._grid.beginFill(0xFFFF00)
-        this._grid.lineStyle(2, 0xDD0000)
-        this._grid.drawRect(paddingOffset, paddingOffset, gridWidth, gridHeight)
-        this._grid.endFill()
-
-        for (let row of this.grid.rows) {
-            for (let column of this.grid.columns) {
-                let cell = this.grid.getCell(row, column)
-                let x = (column * cellWidth) + paddingOffset
-                let y = (row * cellHeight) + paddingOffset
-
-                this._drawRoom(x, y, cellHeight, cellWidth, {
-                    N: true, // shared wall
-                    W: true, // shared wall
-                    E: this.grid.hasLinkEast(cell),
-                    S: this.grid.hasLinkSouth(cell)
-                })
-            }
-        }
-    }
-
-    _drawRoom(x, y, height, width, walls) {
-        _.forEach(walls, (isLinked, wall) => {
-            if (!isLinked) {
-                this._drawWall(x, y, height, width, wall)
-            }
-        })
-    }
-
-    _drawWall(x, y, height, width, wall) {
-        let startX = x, startY = y
-        let offsetX = 0, offsetY = 0
-        switch (wall) {
-            case 'N':
-                offsetX = width
-                break;
-            case 'E':
-                startX = x + width
-                offsetY = height
-                break;
-            case 'S':
-                startY = y + height
-                offsetX = width
-                break;
-            case 'W':
-                offsetY = height
-                break;
-        }
-
-        this._grid.beginFill()
-        this._grid.moveTo(startX, startY)
-        this._grid.lineTo(startX + offsetX, startY + offsetY)
-        this._grid.endFill()
     }
 }

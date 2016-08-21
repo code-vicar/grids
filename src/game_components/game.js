@@ -46,7 +46,6 @@ export default class Game {
         this.stage = new PIXI.Container()
 
         this.maze = new Maze(0, 0, 500, 500)
-        this.maze.padding = 50
         this.stage.addChild(this.maze.container)
     }
 
