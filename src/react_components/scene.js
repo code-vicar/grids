@@ -39,8 +39,10 @@ export class Scene extends React.Component {
     }
 
     componentWillUnmount() {
-        this.renderer.destroy()
-        delete this.renderer
+        if (this.renderer) {
+            this.renderer.destroy()
+            delete this.renderer
+        }
     }
 
     mouseMove(event) {

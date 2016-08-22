@@ -26,12 +26,10 @@ module.exports = {
             {
                 test: /\.json$/,
                 loader: 'json-loader'
-            }
-        ],
-        postLoaders: [
+            },
             {
                 include: path.resolve(__dirname, 'node_modules/pixi.js'),
-                loader: 'transform/cacheable?brfs'
+                loader: 'ify'
             }
         ]
     },

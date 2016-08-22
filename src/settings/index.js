@@ -3,8 +3,8 @@ export function getInitialState() {
         scene: {
             isLoading: true,
             maze: {
-                height: 500,
-                width: 500,
+                height: 640,
+                width: 640,
                 padding: 50
             }
         }

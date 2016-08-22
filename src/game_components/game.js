@@ -45,7 +45,7 @@ export default class Game {
     _onLoaded() {
         this.stage = new PIXI.Container()
 
-        this.maze = new Maze(0, 0, 500, 500)
+        this.maze = new Maze(0, 0, 640, 640)
         this.stage.addChild(this.maze.container)
     }
 
