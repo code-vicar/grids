@@ -8,6 +8,14 @@ export function highlightRoom(room) {
     }
 }
 
+export function roomClicked(room) {
+    return {
+        type: Scene.RoomClicked,
+        row_index: room.row_index,
+        column_index: room.column_index
+    }
+}
+
 export function loaded() {
     return {
         type: Scene.Loaded

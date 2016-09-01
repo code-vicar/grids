@@ -5,12 +5,13 @@ import PIXI from 'pixi.js'
 
 import Game from '../game_components/game'
 
-import { highlightRoom } from '../actions/scene'
+import { highlightRoom, roomClicked } from '../actions/scene'
 
 export class Scene extends React.Component {
     constructor(props) {
         super(props)
         this.mouseMove = this.mouseMove.bind(this)
+        this.onClick = this.onClick.bind(this)
     }
 
     componentDidMount() {
@@ -33,6 +34,8 @@ export class Scene extends React.Component {
     componentDidUpdate() {
         let mazeState = _.get(this, 'props.scene.maze')
         this.game.maze.highlightedRoom = mazeState.highlightedRoom
+        this.game.maze.setStart(mazeState.startRoom)
+        this.game.maze.setEnd(mazeState.endRoom)
 
         this.game.update()
         this.game.render()
@@ -58,11 +61,23 @@ export class Scene extends React.Component {
         }
     }
 
+    onClick(event) {
+        let cRect = event.target.getBoundingClientRect()
+        let x = event.clientX - cRect.left
+        let y = event.clientY - cRect.top
+
+        let room = this.game.maze.getRoomFromCoords(x, y)
+        if (!_.isNil(room)) {
+            let onRoomClicked = _.get(this, 'props.onRoomClicked')
+            onRoomClicked(room)
+        }
+    }
+
     render() {
         return (
             <canvas ref={(c) => {
                 this._canvas = c
-            } } onMouseMove={this.mouseMove} />
+            } } onMouseMove={this.mouseMove} onClick={this.onClick} />
         )
     }
 }
@@ -84,6 +99,9 @@ function mapDispatchToProps(dispatch) {
     return {
         onRoomHovered: (room) => {
             dispatch(highlightRoom(room))
+        },
+        onRoomClicked: (room) => {
+            dispatch(roomClicked(room))
         }
     }
 }

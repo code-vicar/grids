@@ -15,8 +15,35 @@ export default class Maze {
         console.log(this.grid.toString())
 
         this._createRoomSprites()
+
+        // this.rooms = new Map();
+        // this.rooms.set('road', new PIXI.Sprite(PIXI.Texture.fromFrame('road.png')))
+        // this.rooms.set('roadTE', new PIXI.Sprite(PIXI.Texture.fromFrame('roadTE.png')))
+        // this.rooms.set('roadTN', new PIXI.Sprite(PIXI.Texture.fromFrame('roadTN.png')))
+        // this.rooms.set('roadTW', new PIXI.Sprite(PIXI.Texture.fromFrame('roadTW.png')))
+        // this.rooms.set('roadTS', new PIXI.Sprite(PIXI.Texture.fromFrame('roadTS.png')))
+        // this.rooms.set('roadNE', new PIXI.Sprite(PIXI.Texture.fromFrame('roadNE.png')))
+        // this.rooms.set('roadNW', new PIXI.Sprite(PIXI.Texture.fromFrame('roadNW.png')))
+        // this.rooms.set('roadSW', new PIXI.Sprite(PIXI.Texture.fromFrame('roadSW.png')))
+        // this.rooms.set('roadSE', new PIXI.Sprite(PIXI.Texture.fromFrame('roadSE.png')))
+        // this.rooms.set('roadEW', new PIXI.Sprite(PIXI.Texture.fromFrame('roadEW.png')))
+        // this.rooms.set('roadNS', new PIXI.Sprite(PIXI.Texture.fromFrame('roadNS.png')))
+        // this.rooms.set('roadEndN', new PIXI.Sprite(PIXI.Texture.fromFrame('roadEndN.png')))
+        // this.rooms.set('roadEndE', new PIXI.Sprite(PIXI.Texture.fromFrame('roadEndE.png')))
+        // this.rooms.set('roadEndS', new PIXI.Sprite(PIXI.Texture.fromFrame('roadEndS.png')))
+        // this.rooms.set('roadEndW', new PIXI.Sprite(PIXI.Texture.fromFrame('roadEndW.png')))
+
+        this.startMarker = new PIXI.Sprite(PIXI.Texture.fromFrame('start.png'))
+        this.startMarker.visible = false
+
+        this.endMarker = new PIXI.Sprite(PIXI.Texture.fromImage('end.png'))
+        this.endMarker.visible = false
+
         this.greenHighlight = new PIXI.Sprite(PIXI.Texture.fromImage('static/green_dash_rect.png'))
         this.greenHighlight.visible = false
+
+        this.container.addChild(this.startMarker)
+        this.container.addChild(this.endMarker)
         this.container.addChild(this.greenHighlight)
     }
 
@@ -52,7 +79,15 @@ export default class Maze {
         this._draw()
 
         if (this.highlightedRoom) {
-            this._drawHighlight(this.highlightedRoom.row_index, this.highlightedRoom.column_index)
+            this._drawSprite(this.highlightedRoom.row_index, this.highlightedRoom.column_index, 'greenHighlight')
+        }
+
+        if (this.startPos) {
+            this._drawSprite(this.startPos.row_index, this.startPos.column_index, 'startMarker')
+        }
+
+        if (this.endPos) {
+            this._drawSprite(this.endPos.row_index, this.endPos.column_index, 'endMarker')
         }
     }
 
@@ -70,6 +105,17 @@ export default class Maze {
         }
     }
 
+    setStart(room) {
+        this.startPos = room
+    }
+
+    setEnd(room) {
+        this.endPos = room
+    }
+
+    // TODO change this to 'setRoomTextures'
+    // create a sprite for a room position if it doesn't exist
+    // update that sprites texture to match maze state
     _createRoomSprites() {
         this.rooms = new Map()
         for (let row of this.grid.rows) {
@@ -92,38 +138,36 @@ export default class Maze {
 
     _getRoomTexture(paths) {
         if (paths.N && paths.E && paths.W && paths.S) {
-            return PIXI.Texture.fromFrame('road.ase')
+            return PIXI.Texture.fromFrame('road.png')
         } else if (paths.N && paths.E && paths.S && !paths.W) {
-            return PIXI.Texture.fromFrame('roadTE.ase')
+            return PIXI.Texture.fromFrame('roadTE.png')
         } else if (paths.N && paths.E && !paths.S && paths.W) {
-            return PIXI.Texture.fromFrame('roadTN.ase')
+            return PIXI.Texture.fromFrame('roadTN.png')
         } else if (paths.N && !paths.E && paths.S && paths.W) {
-            return PIXI.Texture.fromFrame('roadTW.ase')
+            return PIXI.Texture.fromFrame('roadTW.png')
         } else if (!paths.N && paths.E && paths.S && paths.W) {
-            return PIXI.Texture.fromFrame('roadTS.ase')
+            return PIXI.Texture.fromFrame('roadTS.png')
         } else if (paths.N && paths.E && !paths.S && !paths.W) {
-            return PIXI.Texture.fromFrame('roadNE.ase')
+            return PIXI.Texture.fromFrame('roadNE.png')
         } else if (paths.N && !paths.E && !paths.S && paths.W) {
-            return PIXI.Texture.fromFrame('roadNW.ase')
+            return PIXI.Texture.fromFrame('roadNW.png')
         } else if (!paths.N && !paths.E && paths.S && paths.W) {
-            return PIXI.Texture.fromFrame('roadSW.ase')
+            return PIXI.Texture.fromFrame('roadSW.png')
         } else if (!paths.N && paths.E && paths.S && !paths.W) {
-            return PIXI.Texture.fromFrame('roadSE.ase')
+            return PIXI.Texture.fromFrame('roadSE.png')
         } else if (!paths.N && paths.E && !paths.S && paths.W) {
-            return PIXI.Texture.fromFrame('roadEW.ase')
+            return PIXI.Texture.fromFrame('roadEW.png')
         } else if (paths.N && !paths.E && paths.S && !paths.W) {
-            return PIXI.Texture.fromFrame('roadNS.ase')
+            return PIXI.Texture.fromFrame('roadNS.png')
         } else if (paths.N && !paths.E && !paths.S && !paths.W) {
-            return PIXI.Texture.fromFrame('roadEndN.ase')
+            return PIXI.Texture.fromFrame('roadEndN.png')
         } else if (!paths.N && paths.E && !paths.S && !paths.W) {
-            return PIXI.Texture.fromFrame('roadEndE.ase')
+            return PIXI.Texture.fromFrame('roadEndE.png')
         } else if (!paths.N && !paths.E && paths.S && !paths.W) {
-            return PIXI.Texture.fromFrame('roadEndS.ase')
+            return PIXI.Texture.fromFrame('roadEndS.png')
         } else if (!paths.N && !paths.E && !paths.S && paths.W) {
-            return PIXI.Texture.fromFrame('roadEndW.ase')
+            return PIXI.Texture.fromFrame('roadEndW.png')
         }
-
-        return PIXI.Texture.fromFrame('roadEndE.ase')
     }
 
     _draw() {
@@ -142,14 +186,14 @@ export default class Maze {
         }
     }
 
-    _drawHighlight(row, column) {
+    _drawSprite(row, column, spriteName) {
         let cellHeight = Math.floor(this.height / this.grid.rowsLength)
         let cellWidth = Math.floor(this.width / this.grid.columnsLength)
 
-        this.greenHighlight.height = cellHeight
-        this.greenHighlight.width = cellWidth
-        this.greenHighlight.x = (column * cellWidth)
-        this.greenHighlight.y = (row * cellHeight)
-        this.greenHighlight.visible = true
+        this[spriteName].height = cellHeight
+        this[spriteName].width = cellWidth
+        this[spriteName].x = (column * cellWidth)
+        this[spriteName].y = (row * cellHeight)
+        this[spriteName].visible = true
     }
 }

@@ -24,7 +24,7 @@ export default class Game {
                 })
 
                 PIXI.loader.add('static/green_dash_rect.png')
-                PIXI.loader.add('static/roads.json')
+                PIXI.loader.add('static/sheet.json')
 
                 PIXI.loader.load(() => {
                     this._loaded = true
@@ -45,7 +45,7 @@ export default class Game {
     _onLoaded() {
         this.stage = new PIXI.Container()
 
-        this.maze = new Maze(0, 0, 640, 640)
+        this.maze = new Maze(0, 0, 320, 320)
         this.stage.addChild(this.maze.container)
     }
 
